@@ -1,0 +1,19 @@
+{
+  "rateLimits": {
+    "limitId": "codex",
+    "primary": { "usedPercent": 20, "windowDurationMins": 300, "resetsAt": 1788188505 },
+    "planType": "business"
+  },
+  "rateLimitsByLimitId": {
+    "codex": {
+      "limitId": "codex",
+      "limitName": "Codex",
+      "primary": { "usedPercent": 20, "windowDurationMins": 300, "resetsAt": 1788188505 }
+    },
+    "review": {
+      "limitId": "review",
+      "limitName": "Code review",
+      "primary": { "usedPercent": 5, "windowDurationMins": 1440, "resetsAt": 1788230000 }
+    }
+  }
+}

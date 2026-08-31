@@ -1,32 +1,34 @@
-//
-//  TokenBarApp.swift
-//  TokenBar
-//
-//  Created by Amjad Hossain on 31/08/2026.
-//
-
 import SwiftUI
-import SwiftData
 
 @main
 struct TokenBarApp: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            Item.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var delegate
+    @State private var state = AppState()
 
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
-    }()
+    init() {
+        delegate.state = state
+    }
 
     var body: some Scene {
-        WindowGroup {
-            ContentView()
+        MenuBarExtra {
+            MenuBarView()
+                .environment(state)
+        } label: {
+            // A label needs something to draw, so icon-only mode uses a glyph
+            // rather than an empty string.
+            if state.settings.menuBarDisplay == .iconOnly {
+                Image(systemName: state.isWarning
+                    ? "gauge.with.dots.needle.bottom.0percent"
+                    : "gauge.with.dots.needle.67percent")
+            } else {
+                Text(state.menuBarTitle)
+            }
         }
-        .modelContainer(sharedModelContainer)
+        .menuBarExtraStyle(.window)
+
+        Settings {
+            SettingsView()
+                .environment(state)
+        }
     }
 }
