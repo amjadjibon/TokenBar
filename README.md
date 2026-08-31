@@ -158,6 +158,31 @@ xcodebuild -project TokenBar.xcodeproj -scheme TokenBar \
 Provider adapters are tested against sanitized fixtures in
 `TokenBarTests/Fixtures/`, so no real CLI is invoked.
 
+## Releasing
+
+Distribution is Developer ID plus notarisation. The Mac App Store is not an
+option, because the app is unsandboxed by necessity.
+
+```sh
+./scripts/release.sh 1.1.0             # build, notarise, staple, DMG
+./scripts/release.sh 1.1.0 --publish   # …and tag and create the GitHub release
+```
+
+Two one-off prerequisites:
+
+- a **Developer ID Application** certificate, which needs a paid Apple Developer
+  Program membership
+- `xcrun notarytool store-credentials tokenbar-notary --apple-id <you> --team-id PPQFDGVAM2`
+
+The version comes from the argument and the build number from the commit count,
+so a release edits nothing in the project and the same commit rebuilds
+identically. The app is stapled in its own right as well as the DMG, so a copy
+dragged out of the disk image still launches on a machine that is offline.
+
+`--skip-notarize` runs everything except the round trip to Apple. It is for
+checking the pipeline without a certificate; the result will not run on anyone
+else's Mac.
+
 ## Adding a provider
 
 Conform to `UsageProvider`, convert the native response into `ProviderUsage`,
