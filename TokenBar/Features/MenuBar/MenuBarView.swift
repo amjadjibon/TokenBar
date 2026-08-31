@@ -40,7 +40,11 @@ struct MenuBarView: View {
                         .foregroundStyle(.secondary)
                 } else {
                     ForEach(state.visibleProviders) { provider in
-                        ProviderSection(provider: provider, state: state.states[provider])
+                        ProviderSection(
+                            provider: provider,
+                            state: state.states[provider],
+                            plan: state.planLabel(for: provider)
+                        )
                     }
                 }
             }

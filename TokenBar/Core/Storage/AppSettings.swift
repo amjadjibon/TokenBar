@@ -51,6 +51,18 @@ nonisolated struct AppSettings: Codable, Sendable, Equatable {
     var menuBarDisplay: MenuBarDisplay = .lowestRemaining
     var selectedProvider: ProviderID = .claude
     var launchAtLogin: Bool = false
+    /// Plan names the user typed in, per provider. Not every CLI reports a plan
+    /// — Antigravity shows its tier only inside its interactive UI — and the
+    /// user knows their own subscription either way.
+    var planLabels: [ProviderID: String] = [:]
 
     static let availableThresholds = [20, 10, 5]
+
+    /// The badge to show beside a provider: what the user typed if they typed
+    /// anything, otherwise whatever the provider reported.
+    func planLabel(for provider: ProviderID, reported: String?) -> String? {
+        let manual = planLabels[provider]?.trimmingCharacters(in: .whitespaces)
+        if let manual, !manual.isEmpty { return manual }
+        return reported
+    }
 }

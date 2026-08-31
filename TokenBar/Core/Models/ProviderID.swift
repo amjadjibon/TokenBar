@@ -1,7 +1,9 @@
 import Foundation
 
 /// Identifies a supported AI subscription provider.
-nonisolated enum ProviderID: String, Codable, CaseIterable, Sendable, Identifiable {
+nonisolated enum ProviderID: String, Codable, CaseIterable, Sendable, Identifiable,
+    CodingKeyRepresentable
+{
     case claude
     case codex
     case antigravity
@@ -19,9 +21,9 @@ nonisolated enum ProviderID: String, Codable, CaseIterable, Sendable, Identifiab
     /// Single-letter abbreviation used by the "selected provider" menu bar mode.
     var abbreviation: String {
         switch self {
-        case .claude: "C"
-        case .codex: "X"
-        case .antigravity: "A"
+        case .claude: "CL"
+        case .codex: "CX"
+        case .antigravity: "AG"
         }
     }
 }

@@ -3,6 +3,7 @@ import SwiftUI
 struct ProviderSection: View {
     let provider: ProviderID
     let state: ProviderState?
+    let plan: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -30,7 +31,7 @@ struct ProviderSection: View {
         HStack(alignment: .firstTextBaseline, spacing: 6) {
             Text(provider.displayName)
                 .font(.headline)
-            if let plan = state?.usage?.plan {
+            if let plan {
                 Text(plan)
                     .font(.caption2)
                     .padding(.horizontal, 5)

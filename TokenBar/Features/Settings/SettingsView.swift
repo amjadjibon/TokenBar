@@ -8,10 +8,31 @@ struct SettingsView: View {
 
         TabView {
             Form {
-                Section("Providers") {
+                Section {
                     ForEach(ProviderID.allCases) { provider in
-                        Toggle(provider.displayName, isOn: binding(for: provider))
+                        HStack {
+                            Toggle(provider.displayName, isOn: binding(for: provider))
+                            Spacer(minLength: 12)
+                            // A TextField's title renders as a leading label on
+                            // macOS, so the reported plan goes in `prompt` to sit
+                            // inside the field as placeholder text instead.
+                            TextField(
+                                "",
+                                text: planBinding(for: provider),
+                                prompt: Text(planPlaceholder(for: provider))
+                            )
+                            .labelsHidden()
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 130)
+                            .accessibilityLabel("\(provider.displayName) plan label")
+                        }
                     }
+                } header: {
+                    Text("Providers")
+                } footer: {
+                    Text("A plan you type here is shown as the badge beside that provider. Leave it empty to use whatever the provider reports — Antigravity reports none.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
                 }
 
                 Section("Refresh") {
@@ -79,6 +100,28 @@ struct SettingsView: View {
                     settings.enabledProviders.insert(provider)
                 } else {
                     settings.enabledProviders.remove(provider)
+                }
+                state.settings = settings
+            }
+        )
+    }
+
+    /// Shows the reported plan as the placeholder, so it is clear what the field
+    /// overrides and what appears if it is left empty.
+    private func planPlaceholder(for provider: ProviderID) -> String {
+        state.states[provider]?.usage?.plan ?? "Plan"
+    }
+
+    private func planBinding(for provider: ProviderID) -> Binding<String> {
+        Binding(
+            get: { state.settings.planLabels[provider] ?? "" },
+            set: { newValue in
+                var settings = state.settings
+                if newValue.trimmingCharacters(in: .whitespaces).isEmpty {
+                    settings.planLabels.removeValue(forKey: provider)
+                } else {
+                    // Stored unmodified so spaces can be typed mid-word.
+                    settings.planLabels[provider] = newValue
                 }
                 state.settings = settings
             }

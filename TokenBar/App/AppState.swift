@@ -145,6 +145,11 @@ final class AppState {
         ProviderID.allCases.filter { settings.enabledProviders.contains($0) }
     }
 
+    /// The plan badge for a provider, honouring anything the user typed in.
+    func planLabel(for provider: ProviderID) -> String? {
+        settings.planLabel(for: provider, reported: states[provider]?.usage?.plan)
+    }
+
     /// Tightest remaining quota across everything enabled — the number that
     /// actually limits the user right now.
     var lowestRemainingPercent: Double? {
