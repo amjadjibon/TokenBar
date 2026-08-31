@@ -12,14 +12,18 @@ struct QuotaBar: View {
         return min(max(remainingPercent / 100, 0), 1)
     }
 
-    private var tint: Color {
+    /// Green with half the quota or more left, yellow below that, red under 10%.
+    /// Grey when the provider reported no percentage at all.
+    static func tint(remainingPercent: Double?) -> Color {
         guard let remainingPercent else { return .secondary }
         switch remainingPercent {
         case ..<10: return .red
-        case ..<25: return .orange
+        case ..<50: return .yellow
         default: return .green
         }
     }
+
+    private var tint: Color { Self.tint(remainingPercent: remainingPercent) }
 
     var body: some View {
         GeometryReader { geometry in
