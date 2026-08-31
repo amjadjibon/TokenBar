@@ -29,6 +29,12 @@ macOS 26.5 or later.
 | Codex | `codex app-server` → `account/rateLimits/read` | None — uses your installed `codex` |
 | Antigravity | `agy -p "/usage"` | None — uses your installed `agy` |
 
+Claude and Codex also report which plan the account is on, shown as a badge
+beside the provider name (`Pro`, `Plus`, `Max`, `Team`…). Claude's comes from
+`claude auth status --json`, asked for only after the quota itself parsed, and a
+failure there costs the badge rather than the refresh. Antigravity exposes no
+plan or tier through its CLI, so it shows none.
+
 ### Claude
 
 Nothing to configure. TokenBar runs:
