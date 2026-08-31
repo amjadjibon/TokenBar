@@ -183,11 +183,30 @@ publish() {
     step "Publishing v$VERSION"
     command -v gh >/dev/null || die "gh not found — install the GitHub CLI or upload $DMG by hand"
 
+    local args=(--title "TokenBar $VERSION" --generate-notes)
+
+    if $SKIP_NOTARIZE; then
+        # Gatekeeper rejects an un-notarised build on every Mac but the one that
+        # produced it. Say so in the release itself, rather than letting people
+        # find out after downloading, and mark it a prerelease so it is never
+        # served as "latest".
+        local notes="$BUILD/notes.md"
+        cat > "$notes" <<'NOTE'
+> **Not notarised.** This build is signed with a development certificate, so
+> macOS Gatekeeper will refuse to open it on any other machine. To run it
+> anyway, right-click the app in Finder and choose **Open**, or:
+>
+> ```sh
+> xattr -d com.apple.quarantine /Applications/TokenBar.app
+> ```
+
+NOTE
+        args+=(--prerelease --notes-file "$notes")
+    fi
+
     git -C "$ROOT" tag -a "v$VERSION" -m "TokenBar $VERSION"
     git -C "$ROOT" push origin "v$VERSION"
-    gh release create "v$VERSION" "$DMG" \
-        --repo "$(git -C "$ROOT" remote get-url origin)" \
-        --title "TokenBar $VERSION" --generate-notes
+    gh release create "v$VERSION" "$DMG" "${args[@]}"
 }
 
 main() {
