@@ -1,3 +1,5 @@
+<img src="assets/AppIcon-1024.png" width="96" align="right" alt="">
+
 # TokenBar
 
 > Know your AI limits.
@@ -15,6 +17,8 @@ CL 16% ⚠
 `CL` is Claude, `CX` Codex, `AG` Antigravity — the menu bar names whichever
 provider is closest to its limit, so the number is never ambiguous about who it
 belongs to.
+
+<img src="assets/TokenBar.png" width="320" alt="The TokenBar menu listing Claude, Codex and Antigravity quota windows, each with a bar, the percentage remaining and a reset countdown">
 
 Everything runs locally. There is no TokenBar account, no backend, and no
 telemetry. TokenBar never collects provider credentials, reads browser cookies,
@@ -99,18 +103,6 @@ The menu lists every enabled provider's quota windows — used and remaining
 percentages, a bar, and the reset countdown. Past a certain height the list
 scrolls while the header and footer stay pinned, so refresh, settings and quit
 stay reachable no matter how many providers are enabled.
-
-```
-TokenBar                        ↻
-─────────────────────────────────
-Claude  Pro
-Session                   56% used
-███████████████░░░░░░░░░░░░░░░░░░
-44% remaining · Resets in 3h 51m
-…
-─────────────────────────────────
-Updated 12:12 AM            ⚙   ⏻
-```
 
 Bars read green with half the quota or more left, yellow below that, and red
 under 10%. Health is never signalled by colour alone: the percentage, a warning
