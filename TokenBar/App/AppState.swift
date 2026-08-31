@@ -150,13 +150,16 @@ final class AppState {
         settings.planLabel(for: provider, reported: states[provider]?.usage?.plan)
     }
 
-    /// Tightest remaining quota across everything enabled — the number that
-    /// actually limits the user right now.
-    var lowestRemainingPercent: Double? {
-        visibleProviders
-            .compactMap { states[$0]?.usage?.lowestRemainingPercent }
-            .min()
+    /// The provider whose quota is tightest right now, and that quota. The menu
+    /// bar names it, so the number is never ambiguous about who it belongs to.
+    var tightest: (provider: ProviderID, remainingPercent: Double)? {
+        MenuBarTitle.tightest(
+            among: visibleProviders,
+            usage: states.compactMapValues(\.usage)
+        )
     }
+
+    var lowestRemainingPercent: Double? { tightest?.remainingPercent }
 
     var isWarning: Bool {
         guard let lowest = lowestRemainingPercent,
@@ -170,17 +173,18 @@ final class AppState {
         case .iconOnly:
             return ""
         case .lowestRemaining:
-            return Self.title(prefix: "TB", percent: lowestRemainingPercent, warning: isWarning)
+            return MenuBarTitle.text(
+                prefix: tightest?.provider.abbreviation ?? MenuBarTitle.unknownPrefix,
+                percent: lowestRemainingPercent,
+                warning: isWarning
+            )
         case .selectedProvider:
             let provider = settings.selectedProvider
-            let percent = states[provider]?.usage?.lowestRemainingPercent
-            return Self.title(prefix: provider.abbreviation, percent: percent, warning: isWarning)
+            return MenuBarTitle.text(
+                prefix: provider.abbreviation,
+                percent: states[provider]?.usage?.lowestRemainingPercent,
+                warning: isWarning
+            )
         }
-    }
-
-    private static func title(prefix: String, percent: Double?, warning: Bool) -> String {
-        guard let percent else { return "\(prefix) —" }
-        let base = "\(prefix) \(Int(percent.rounded()))%"
-        return warning ? "\(base) ⚠" : base
     }
 }
