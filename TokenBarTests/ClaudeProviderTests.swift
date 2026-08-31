@@ -124,6 +124,18 @@ struct ClaudeProviderTests {
         #expect(usage.limits.count == 2)
     }
 
+    /// The usage report says nothing about which plan the account is on, so the
+    /// badge comes from `claude auth status` instead.
+    @Test func carriesThePlanWhenOneIsKnown() throws {
+        let usage = try ClaudeProvider.parse(fixture("claude-usage.json"), plan: "Pro", now: now)
+        #expect(usage.plan == "Pro")
+    }
+
+    @Test func hasNoPlanWhenNoneCouldBeRead() throws {
+        let usage = try ClaudeProvider.parse(fixture("claude-usage.json"), now: now)
+        #expect(usage.plan == nil)
+    }
+
     @Test func reportsInvalidResponseForGarbage() {
         #expect(throws: ProviderError.invalidResponse) {
             try ClaudeProvider.parse("not json at all", now: now)

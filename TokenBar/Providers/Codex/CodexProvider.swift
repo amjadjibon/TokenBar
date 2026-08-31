@@ -45,7 +45,7 @@ nonisolated struct CodexProvider: UsageProvider {
 
         return ProviderUsage(
             provider: .codex,
-            plan: result.planType?.capitalized,
+            plan: PlanName.display(result.planType),
             limits: limits
         )
     }

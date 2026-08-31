@@ -18,6 +18,12 @@ nonisolated struct ClaudeProvider: UsageProvider {
         self.runner = runner
     }
 
+    /// `claude auth status --json`. Only the plan is read; the rest of that
+    /// payload identifies the account and is deliberately left alone.
+    private struct AuthStatus: Decodable {
+        let subscriptionType: String?
+    }
+
     /// The report body, which is the only part of the envelope TokenBar reads.
     private struct Envelope: Decodable {
         let result: String?
@@ -42,10 +48,34 @@ nonisolated struct ClaudeProvider: UsageProvider {
             throw ProviderError.processFailed(output.exitCode)
         }
 
-        return try Self.parse(output.stdout)
+        let usage = try Self.parse(output.stdout)
+
+        // Asked for only once the quota itself parsed, so an account with no
+        // subscription never pays for the extra call. Best-effort: a missing
+        // badge is not worth failing a refresh over.
+        guard let plan = await planName(executable: executable) else { return usage }
+        return ProviderUsage(
+            provider: usage.provider,
+            plan: plan,
+            limits: usage.limits,
+            updatedAt: usage.updatedAt
+        )
     }
 
-    static func parse(_ stdout: String, now: Date = Date()) throws -> ProviderUsage {
+    private func planName(executable: URL) async -> String? {
+        guard let output = try? await runner.run(
+            executable: executable,
+            arguments: ["auth", "status", "--json"],
+            timeout: .seconds(10)
+        ),
+            output.exitCode == 0,
+            let status = JSONFile.decodeCommandOutput(AuthStatus.self, from: output.stdout)
+        else { return nil }
+
+        return PlanName.display(status.subscriptionType)
+    }
+
+    static func parse(_ stdout: String, plan: String? = nil, now: Date = Date()) throws -> ProviderUsage {
         guard let envelope = JSONFile.decodeCommandOutput(Envelope.self, from: stdout)
         else { throw ProviderError.invalidResponse }
 
@@ -60,6 +90,6 @@ nonisolated struct ClaudeProvider: UsageProvider {
             throw ProviderError.unavailable
         }
 
-        return ProviderUsage(provider: .claude, limits: limits, updatedAt: now)
+        return ProviderUsage(provider: .claude, plan: plan, limits: limits, updatedAt: now)
     }
 }
