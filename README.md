@@ -9,8 +9,12 @@ No setup: every provider is read through the CLI you already have installed and
 signed in.
 
 ```
-TB 15% ⚠
+CL 16% ⚠
 ```
+
+`CL` is Claude, `CX` Codex, `AG` Antigravity — the menu bar names whichever
+provider is closest to its limit, so the number is never ambiguous about who it
+belongs to.
 
 Everything runs locally. There is no TokenBar account, no backend, and no
 telemetry. TokenBar never collects provider credentials, reads browser cookies,
@@ -91,15 +95,34 @@ Fractions are reported as `0...1` and converted to percentages.
 
 ## Menu
 
-The menu lists every enabled provider's quota windows. Past a certain height the
-list scrolls while the header and footer stay pinned, so Refresh, Settings and
-Quit are always reachable no matter how many providers are enabled.
+The menu lists every enabled provider's quota windows — used and remaining
+percentages, a bar, and the reset countdown. Past a certain height the list
+scrolls while the header and footer stay pinned, so refresh, settings and quit
+stay reachable no matter how many providers are enabled.
+
+```
+TokenBar                        ↻
+─────────────────────────────────
+Claude  Pro
+Session                   56% used
+███████████████░░░░░░░░░░░░░░░░░░
+44% remaining · Resets in 3h 51m
+…
+─────────────────────────────────
+Updated 12:12 AM            ⚙   ⏻
+```
+
+Bars read green with half the quota or more left, yellow below that, and red
+under 10%. Health is never signalled by colour alone: the percentage, a warning
+glyph and the accessibility label all carry it too.
 
 ## Settings
 
 - **Providers** — enable or disable each one
 - **Refresh** — 1/5/10/15/30 minutes, or manual only (default 5)
-- **Menu bar** — lowest remaining quota, one selected provider, or icon only
+- **Menu bar** — the tightest quota across providers (tagged with that
+  provider), one chosen provider, or an icon only
+- **Plan** — a badge per provider; typed labels win over reported ones
 - **Notifications** — warn below 20%, 10% and/or 5%, and when a quota resets
 - **Startup** — launch at login
 
