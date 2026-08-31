@@ -2,7 +2,6 @@ import SwiftUI
 
 struct MenuBarView: View {
     @Environment(AppState.self) private var state
-    @Environment(\.openSettings) private var openSettings
 
     /// Beyond this the provider list scrolls. Chosen so the panel stays well
     /// short of the screen even on a laptop display, however many providers are
@@ -24,7 +23,7 @@ struct MenuBarView: View {
 
             footer
                 .padding(.horizontal, 12)
-                .padding(.vertical, 10)
+                .padding(.vertical, 8)
         }
         .frame(width: 280)
     }
@@ -81,30 +80,37 @@ struct MenuBarView: View {
         }
     }
 
+    /// One line: when it last synced, then the two actions as glyphs. Their
+    /// meaning is carried by tooltips and accessibility labels rather than
+    /// words, so the row stays short.
     private var footer: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(state.lastRefresh.map { "Last updated \(QuotaFormat.clock($0))" } ?? "Not refreshed yet")
+        HStack(spacing: 12) {
+            Text(state.lastRefresh.map { "Updated \(QuotaFormat.clock($0))" } ?? "Not refreshed")
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            HStack {
-                Button("Settings…") {
-                    openSettings()
-                    // An accessory app is never frontmost, so the settings window
-                    // would otherwise open behind whatever the user is using.
-                    NSApp.activate()
-                }
-                .buttonStyle(.borderless)
-                .keyboardShortcut(",")
+            Spacer(minLength: 4)
 
-                Spacer()
-
-                Button("Quit") {
-                    NSApplication.shared.terminate(nil)
-                }
-                .buttonStyle(.borderless)
-                .keyboardShortcut("q")
+            // SettingsLink rather than the openSettings action: from inside a
+            // MenuBarExtra panel that action does nothing, because the panel is
+            // not a scene that can service it.
+            SettingsLink {
+                Image(systemName: "gearshape")
             }
+            .buttonStyle(.borderless)
+            .keyboardShortcut(",")
+            .help("Settings")
+            .accessibilityLabel("Settings")
+
+            Button {
+                NSApplication.shared.terminate(nil)
+            } label: {
+                Image(systemName: "power")
+            }
+            .buttonStyle(.borderless)
+            .keyboardShortcut("q")
+            .help("Quit TokenBar")
+            .accessibilityLabel("Quit TokenBar")
         }
     }
 }
