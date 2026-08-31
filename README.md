@@ -29,11 +29,16 @@ macOS 26.5 or later.
 | Codex | `codex app-server` → `account/rateLimits/read` | None — uses your installed `codex` |
 | Antigravity | `agy -p "/usage"` | None — uses your installed `agy` |
 
-Claude and Codex also report which plan the account is on, shown as a badge
-beside the provider name (`Pro`, `Plus`, `Max`, `Team`…). Claude's comes from
+Claude and Codex report which plan the account is on, shown as a badge beside
+the provider name (`Pro`, `Plus`, `Max`, `Team`…). Claude's comes from
 `claude auth status --json`, asked for only after the quota itself parsed, and a
-failure there costs the badge rather than the refresh. Antigravity exposes no
-plan or tier through its CLI, so it shows none.
+failure there costs the badge rather than the refresh.
+
+Antigravity shows its tier only inside its interactive UI and reports nothing to
+a script, so Settings → General has a plan field per provider. Type a plan there
+and it becomes that provider's badge; leave it empty to use whatever the
+provider reports. A typed label wins over a reported one — you know your own
+subscription.
 
 ### Claude
 
