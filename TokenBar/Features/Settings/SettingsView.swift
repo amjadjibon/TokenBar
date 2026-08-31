@@ -1,11 +1,24 @@
+import AppKit
 import SwiftUI
 
 struct SettingsView: View {
     @Environment(AppState.self) private var state
 
-    var body: some View {
-        @Bindable var state = state
+    /// Every control writes through this rather than `$state.settings.x`.
+    /// `AppState.settings` is a computed property, which `@Observable` does not
+    /// instrument, so the projected binding renders but never writes back.
+    private func setting<Value>(_ keyPath: WritableKeyPath<AppSettings, Value>) -> Binding<Value> {
+        Binding(
+            get: { state.settings[keyPath: keyPath] },
+            set: { newValue in
+                var settings = state.settings
+                settings[keyPath: keyPath] = newValue
+                state.settings = settings
+            }
+        )
+    }
 
+    var body: some View {
         TabView {
             Form {
                 Section {
@@ -36,7 +49,7 @@ struct SettingsView: View {
                 }
 
                 Section("Refresh") {
-                    Picker("Refresh interval", selection: $state.settings.refreshInterval) {
+                    Picker("Refresh interval", selection: setting(\.refreshInterval)) {
                         ForEach(RefreshInterval.allCases) { interval in
                             Text(interval.displayName).tag(interval)
                         }
@@ -44,7 +57,7 @@ struct SettingsView: View {
                 }
 
                 Section("Startup") {
-                    Toggle("Launch TokenBar at login", isOn: $state.settings.launchAtLogin)
+                    Toggle("Launch TokenBar at login", isOn: setting(\.launchAtLogin))
                 }
             }
             .formStyle(.grouped)
@@ -52,7 +65,7 @@ struct SettingsView: View {
 
             Form {
                 Section("Display") {
-                    Picker("Menu bar shows", selection: $state.settings.menuBarDisplay) {
+                    Picker("Menu bar shows", selection: setting(\.menuBarDisplay)) {
                         ForEach(MenuBarDisplay.allCases) { mode in
                             Text(mode.displayName).tag(mode)
                         }
@@ -60,7 +73,7 @@ struct SettingsView: View {
                     .pickerStyle(.inline)
 
                     if state.settings.menuBarDisplay == .selectedProvider {
-                        Picker("Provider", selection: $state.settings.selectedProvider) {
+                        Picker("Provider", selection: setting(\.selectedProvider)) {
                             ForEach(ProviderID.allCases) { provider in
                                 Text(provider.displayName).tag(provider)
                             }
@@ -78,7 +91,7 @@ struct SettingsView: View {
                     }
                 }
                 Section {
-                    Toggle("Notify when quota resets", isOn: $state.settings.notifyOnReset)
+                    Toggle("Notify when quota resets", isOn: setting(\.notifyOnReset))
                 } footer: {
                     Text("Reset notices are only sent for a quota you were warned about.")
                         .font(.caption)
@@ -89,6 +102,23 @@ struct SettingsView: View {
             .tabItem { Label("Notifications", systemImage: "bell") }
         }
         .frame(width: 460, height: 420)
+        .onAppear(perform: bringToFront)
+    }
+
+    /// An accessory app is never frontmost, so its settings window opens behind
+    /// whatever the user was working in — which reads as the button doing
+    /// nothing. Done here rather than at the button so it applies however the
+    /// window was opened.
+    private func bringToFront() {
+        Task { @MainActor in
+            // The window does not exist yet when the view first appears.
+            try? await Task.sleep(for: .milliseconds(120))
+            NSApp.activate()
+            // The menu bar panel cannot become main, so this picks out settings.
+            NSApp.windows
+                .first { $0.canBecomeMain && $0.isVisible }?
+                .makeKeyAndOrderFront(nil)
+        }
     }
 
     private func binding(for provider: ProviderID) -> Binding<Bool> {
