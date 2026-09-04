@@ -5,7 +5,7 @@
 > Know your AI limits.
 
 A native macOS menu bar app that shows how much AI subscription quota you have
-left and when it resets, across Claude Code, Codex and Antigravity.
+left and when it resets, across Claude Code, Codex, Grok and Antigravity.
 
 No setup: every provider is read through the CLI you already have installed and
 signed in.
@@ -14,16 +14,17 @@ signed in.
 CL 16% ⚠
 ```
 
-`CL` is Claude, `CX` Codex, `AG` Antigravity — the menu bar names whichever
+`CL` is Claude, `CX` Codex, `GK` Grok, `AG` Antigravity — the menu bar names whichever
 provider is closest to its limit, so the number is never ambiguous about who it
 belongs to.
 
 <img src="assets/TokenBar.png" width="320" alt="The TokenBar menu listing Claude, Codex and Antigravity quota windows, each with a bar, the percentage remaining and a reset countdown">
 
 Everything runs locally. There is no TokenBar account, no backend, and no
-telemetry. TokenBar never collects provider credentials, reads browser cookies,
+telemetry. TokenBar never stores provider credentials, reads browser cookies,
 or scrapes provider websites — it reuses the authentication your existing CLIs
-already have.
+already have. Grok's compatibility fallback briefly reads the local CLI token
+to call the CLI's own billing endpoint; it is never logged or persisted.
 
 ## Requirements
 
@@ -35,6 +36,7 @@ macOS 26.5 or later.
 | --- | --- | --- |
 | Claude | `claude -p "/usage"` | None — uses your installed `claude` |
 | Codex | `codex app-server` → `account/rateLimits/read` | None — uses your installed `codex` |
+| Grok | `grok agent stdio` → `x.ai/billing` (CLI billing fallback) | None — uses your installed `grok` |
 | Antigravity | `agy -p "/usage"` | None — uses your installed `agy` |
 
 Claude and Codex report which plan the account is on, shown as a badge beside
@@ -73,6 +75,26 @@ stale or wrong number.
 
 Quota appears for Claude subscription accounts. An API-key account gets a report
 with no quota lines, and TokenBar reports the provider as unavailable.
+
+### Grok
+
+Grok has one shared subscription usage pool rather than separate 5-hour and
+weekly coding windows. TokenBar uses the period type returned by Grok, so the
+bar is normally `Weekly` and will also render a `Monthly` period correctly for
+an older or differently configured account.
+
+TokenBar first asks the official CLI over its local ACP transport:
+
+```sh
+grok agent stdio  # initialize, authenticate, then x.ai/billing
+```
+
+Some stable Grok builds do not yet expose `x.ai/billing` over stdio. For those,
+TokenBar reads only the bearer token and user id written by `grok login` to
+`~/.grok/auth.json`, sends them to the same
+`cli-chat-proxy.grok.com/v1/billing?format=credits` endpoint used by Grok Build,
+then immediately discards them. TokenBar never refreshes, copies, logs or caches
+the credential. Run `grok login` again if that credential expires.
 
 ### Antigravity
 
@@ -130,12 +152,13 @@ notices are only sent for a quota you were actually warned about.
 └── history/usage.jsonl # appended when a quota actually changes
 ```
 
-TokenBar reads no other files. Every provider is queried through its own CLI.
+TokenBar reads no other files except Grok's `~/.grok/auth.json` compatibility
+fallback described above. Every provider reuses its own CLI sign-in.
 
 ## Sandboxing
 
 TokenBar runs outside the macOS app sandbox. It has to: it launches your own
-`claude`, `codex` and `agy` binaries, which read credentials and config from
+`claude`, `codex`, `grok` and `agy` binaries, which read credentials and config from
 your home directory. That does not work from inside a sandbox container. The hardened
 runtime stays enabled.
 

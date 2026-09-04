@@ -6,6 +6,7 @@ nonisolated enum ProviderID: String, Codable, CaseIterable, Sendable, Identifiab
 {
     case claude
     case codex
+    case grok
     case antigravity
 
     var id: String { rawValue }
@@ -14,6 +15,7 @@ nonisolated enum ProviderID: String, Codable, CaseIterable, Sendable, Identifiab
         switch self {
         case .claude: "Claude"
         case .codex: "Codex"
+        case .grok: "Grok"
         case .antigravity: "Antigravity"
         }
     }
@@ -23,6 +25,7 @@ nonisolated enum ProviderID: String, Codable, CaseIterable, Sendable, Identifiab
         switch self {
         case .claude: "CL"
         case .codex: "CX"
+        case .grok: "GK"
         case .antigravity: "AG"
         }
     }

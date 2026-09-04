@@ -24,6 +24,7 @@ struct ProviderManagerTests {
         let manager = ProviderManager(providers: [
             StubProvider(id: .claude),
             StubProvider(id: .codex),
+            StubProvider(id: .grok),
             StubProvider(id: .antigravity),
         ])
         let results = await manager.refresh([.claude, .codex])

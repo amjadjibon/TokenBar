@@ -10,7 +10,7 @@ struct MenuBarTitleTests {
         )
     }
 
-    private let order: [ProviderID] = [.claude, .codex, .antigravity]
+    private let order: [ProviderID] = [.claude, .codex, .grok, .antigravity]
 
     @Test func namesTheProviderHoldingTheTightestQuota() {
         let tightest = MenuBarTitle.tightest(
@@ -63,7 +63,7 @@ struct MenuBarTitleTests {
     /// Claude and Codex share a first letter, so single letters would collide.
     @Test func providerTagsAreDistinct() {
         let tags = ProviderID.allCases.map(\.abbreviation)
-        #expect(tags == ["CL", "CX", "AG"])
+        #expect(tags == ["CL", "CX", "GK", "AG"])
         #expect(Set(tags).count == tags.count)
     }
 }

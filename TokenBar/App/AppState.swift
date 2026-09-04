@@ -24,6 +24,7 @@ final class AppState {
         manager: ProviderManager = ProviderManager(providers: [
             ClaudeProvider(),
             CodexProvider(),
+            GrokProvider(),
             AntigravityProvider(),
         ]),
         settingsStore: SettingsStore = SettingsStore(),
