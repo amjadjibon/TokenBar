@@ -30,6 +30,12 @@ to call the CLI's own billing endpoint; it is never logged or persisted.
 
 macOS 26.5 or later.
 
+After the first Homebrew release, install with:
+
+```sh
+brew install --cask amjadjibon/tap/tokenbar
+```
+
 ## Providers
 
 | Provider | Source | Setup |
@@ -187,6 +193,7 @@ option, because the app is unsandboxed by necessity.
 ```sh
 ./scripts/release.sh 1.1.0             # build, notarise, staple, DMG
 ./scripts/release.sh 1.1.0 --publish   # …and tag and create the GitHub release
+./scripts/release.sh 1.1.0 --publish --tap amjadjibon/homebrew-tap
 ```
 
 Two one-off prerequisites:
