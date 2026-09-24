@@ -8,6 +8,14 @@ struct LimitRow: View {
         (limit.remainingPercent ?? 100) < 20
     }
 
+    private var paceMessage: String? {
+        guard limit.usedPercent != nil,
+              let reset = limit.resetAt,
+              reset > Date()
+        else { return nil }
+        return pace?.message ?? "Collecting usage pace…"
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(alignment: .firstTextBaseline) {
@@ -37,8 +45,8 @@ struct LimitRow: View {
             .font(.caption)
             .foregroundStyle(.secondary)
 
-            if let pace {
-                Text(pace.message)
+            if let paceMessage {
+                Text(paceMessage)
                     .font(.caption)
                     .foregroundStyle(pace == .above ? .orange : .secondary)
             }
@@ -54,7 +62,7 @@ struct LimitRow: View {
         ]
         if isLow { parts.append("low") }
         if let reset = QuotaFormat.reset(limit.resetAt) { parts.append(reset) }
-        if let pace { parts.append(pace.message) }
+        if let paceMessage { parts.append(paceMessage) }
         return parts.joined(separator: ", ")
     }
 }

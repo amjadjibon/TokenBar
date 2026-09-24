@@ -45,7 +45,7 @@ actor HistoryStore {
                reset > entry.timestamp,
                let baseline = entries?.last(where: {
                    $0.provider == entry.provider && $0.limit == entry.limit &&
-                   $0.resetAt == reset &&
+                   Self.sameWindow($0.resetAt, reset) &&
                    $0.timestamp <= entry.timestamp.addingTimeInterval(-15 * 60)
                }),
                let estimate = UsagePace.evaluate(
@@ -63,12 +63,22 @@ actor HistoryStore {
         let changes = newEntries.filter { entry in
             let latest = entries?.last { prior in
                 prior.provider == entry.provider && prior.limit == entry.limit &&
-                prior.resetAt == entry.resetAt
+                Self.sameWindow(prior.resetAt, entry.resetAt)
             }
             return latest?.usedPercent != entry.usedPercent
         }
         append(changes)
         return pace
+    }
+
+    /// Some providers move a reported reset by a second between polls. Actual
+    /// quota rollovers move the reset much farther than this tolerance.
+    nonisolated static func sameWindow(_ first: Date?, _ second: Date?) -> Bool {
+        switch (first, second) {
+        case (nil, nil): true
+        case (let first?, let second?): abs(first.timeIntervalSince(second)) <= 60
+        default: false
+        }
     }
 
     private func loadIfNeeded() {

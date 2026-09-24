@@ -53,4 +53,11 @@ struct UsagePaceTests {
             timeUntilReset: 3600
         ) == .above)
     }
+
+    @Test func matchesResetTimesWithSmallProviderJitter() {
+        let reset = Date(timeIntervalSince1970: 1_000_000)
+        #expect(HistoryStore.sameWindow(reset, reset.addingTimeInterval(-1)))
+        #expect(!HistoryStore.sameWindow(reset, reset.addingTimeInterval(3600)))
+        #expect(!HistoryStore.sameWindow(reset, nil))
+    }
 }

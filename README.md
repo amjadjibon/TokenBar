@@ -136,7 +136,8 @@ After at least 15 minutes of readings in the same quota window, each row also
 shows whether observed usage is within the pace needed to last until reset or may
 use up the quota early. The estimate compares the change in used percentage
 with the remaining percentage and time. It is unavailable when a provider does
-not report a reset time, and it is a projection rather than a token count.
+not report a reset time, and it is a projection rather than a token count. Until
+enough readings exist, the row says it is collecting usage pace.
 
 Bars read green with half the quota or more left, yellow below that, and red
 under 10%. Health is never signalled by colour alone: the percentage, a warning
