@@ -20,6 +20,7 @@ struct GrokProviderTests {
         #expect(usage.limits[0].usedPercent == 42.5)
         #expect(usage.limits[0].remainingPercent == 57.5)
         #expect(usage.limits[0].resetAt != nil)
+        #expect(usage.limits[0].windowStartAt != nil)
     }
 
     @Test func supportsTheDeprecatedCreditShape() throws {

@@ -51,7 +51,8 @@ nonisolated struct AntigravityUsageReport: Decodable, Sendable {
             group.buckets
                 .sorted { Self.rank($0.window) < Self.rank($1.window) }
                 .map { bucket in
-                    UsageLimit(
+                    let duration = Self.windowDuration(bucket.window ?? Self.windowName(bucket))
+                    return UsageLimit(
                         id: bucket.id,
                         name: "\(Self.groupName(group.name)) \(Self.windowName(bucket))",
                         // Reported 0...1, not a percentage. Rounded because
@@ -60,6 +61,9 @@ nonisolated struct AntigravityUsageReport: Decodable, Sendable {
                         remainingPercent: bucket.remainingFraction.map {
                             ($0 * 10_000).rounded() / 100
                         },
+                        windowStartAt: bucket.resetTime.flatMap { reset in
+                            duration.map { reset.addingTimeInterval(-$0) }
+                        },
                         resetAt: bucket.resetTime
                     )
                 }
@@ -67,6 +71,15 @@ nonisolated struct AntigravityUsageReport: Decodable, Sendable {
     }
 
     private static let windowOrder = ["5h", "daily", "weekly", "monthly"]
+
+    private static func windowDuration(_ window: String?) -> TimeInterval? {
+        switch window?.lowercased() {
+        case "5h", "5 hour": 5 * 3600
+        case "daily": 24 * 3600
+        case "weekly": 7 * 24 * 3600
+        default: nil
+        }
+    }
 
     /// Shortest window first, matching how the other providers are listed.
     private static func rank(_ window: String?) -> Int {

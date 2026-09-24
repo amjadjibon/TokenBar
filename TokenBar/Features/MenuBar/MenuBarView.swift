@@ -42,8 +42,7 @@ struct MenuBarView: View {
                         ProviderSection(
                             provider: provider,
                             state: state.states[provider],
-                            plan: state.planLabel(for: provider),
-                            pace: state.pace[provider] ?? [:]
+                            plan: state.planLabel(for: provider)
                         )
                     }
                 }

@@ -40,6 +40,7 @@ struct AntigravityProviderTests {
         let usage = try AntigravityProvider.parse(fixture("antigravity-usage.json"))
         let fiveHour = try #require(usage.limits.first { $0.id == "gemini-5h" })
         #expect(fiveHour.resetAt == Date(timeIntervalSince1970: 1_788_203_928)) // 2026-08-31T19:18:48Z
+        #expect(fiveHour.windowStartAt == fiveHour.resetAt?.addingTimeInterval(-5 * 3600))
     }
 
     @Test func namesWindowsFromTheBucketLabelWhenTheWindowFieldIsMissing() throws {

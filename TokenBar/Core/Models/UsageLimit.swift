@@ -9,6 +9,7 @@ nonisolated struct UsageLimit: Identifiable, Codable, Sendable, Equatable {
     let name: String
     let usedPercent: Double?
     let remainingPercent: Double?
+    let windowStartAt: Date?
     let resetAt: Date?
     let metadata: [String: String]?
 
@@ -17,6 +18,7 @@ nonisolated struct UsageLimit: Identifiable, Codable, Sendable, Equatable {
         name: String,
         usedPercent: Double? = nil,
         remainingPercent: Double? = nil,
+        windowStartAt: Date? = nil,
         resetAt: Date? = nil,
         metadata: [String: String]? = nil
     ) {
@@ -28,6 +30,7 @@ nonisolated struct UsageLimit: Identifiable, Codable, Sendable, Equatable {
 
         self.usedPercent = used
         self.remainingPercent = remaining
+        self.windowStartAt = windowStartAt
         self.resetAt = resetAt
         self.metadata = metadata
     }

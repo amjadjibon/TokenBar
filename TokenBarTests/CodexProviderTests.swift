@@ -16,6 +16,7 @@ struct CodexProviderTests {
         #expect(limits[0].usedPercent == 67)
         #expect(limits[0].remainingPercent == 33)
         #expect(limits[0].resetAt == Date(timeIntervalSince1970: 1_788_188_505))
+        #expect(limits[0].windowStartAt == Date(timeIntervalSince1970: 1_788_188_505 - 5 * 3600))
 
         #expect(limits[1].name == "Weekly")
         #expect(limits[1].usedPercent == 10)

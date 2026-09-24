@@ -132,12 +132,10 @@ percentages, a bar, and the reset countdown. Past a certain height the list
 scrolls while the header and footer stay pinned, so refresh, settings and quit
 stay reachable no matter how many providers are enabled.
 
-After at least 15 minutes of readings in the same quota window, each row also
-shows whether observed usage is within the pace needed to last until reset or may
-use up the quota early. The estimate compares the change in used percentage
-with the remaining percentage and time. It is unavailable when a provider does
-not report a reset time, and it is a projection rather than a token count. Until
-enough readings exist, the row says it is collecting usage pace.
+Each quota row compares usage with the time elapsed in its window. For a 5-hour
+limit, 20% used after 1 hour is on pace, more is above pace, and less is below
+pace. This uses the current quota and reset time without recording past usage.
+Pace is unavailable when a window's start or reset time is unknown.
 
 Bars read green with half the quota or more left, yellow below that, and red
 under 10%. Health is never signalled by colour alone: the percentage, a warning
@@ -161,8 +159,7 @@ notices are only sent for a quota you were actually warned about.
 ```
 ~/Library/Application Support/TokenBar/
 ├── settings.json
-├── cache/              # last successful reading per provider
-└── history/usage.jsonl # appended when a quota actually changes
+└── cache/              # last successful reading per provider
 ```
 
 TokenBar reads no other files except Grok's `~/.grok/auth.json` compatibility

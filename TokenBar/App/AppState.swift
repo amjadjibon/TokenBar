@@ -10,12 +10,10 @@ final class AppState {
     private(set) var states: [ProviderID: ProviderState] = [:]
     private(set) var isRefreshing = false
     private(set) var lastRefresh: Date?
-    private(set) var pace: [ProviderID: [String: UsagePace]] = [:]
 
     private let manager: ProviderManager
     private let settingsStore: SettingsStore
     private let snapshots: SnapshotStore
-    private let history: HistoryStore
     private let notifications: NotificationManager
     private let logger = Logger(subsystem: TokenBarLog.subsystem, category: "app")
 
@@ -30,13 +28,11 @@ final class AppState {
         ]),
         settingsStore: SettingsStore = SettingsStore(),
         snapshots: SnapshotStore = SnapshotStore(),
-        history: HistoryStore = HistoryStore(),
         notifications: NotificationManager = NotificationManager()
     ) {
         self.manager = manager
         self.settingsStore = settingsStore
         self.snapshots = snapshots
-        self.history = history
         self.notifications = notifications
     }
 
@@ -85,7 +81,6 @@ final class AppState {
         let enabled = settings.enabledProviders
         for provider in ProviderID.allCases where !enabled.contains(provider) {
             states[provider] = nil
-            pace[provider] = nil
         }
 
         let results = await manager.refresh(enabled)
@@ -95,7 +90,6 @@ final class AppState {
             case .success(let usage):
                 let previous = states[usage.provider]?.usage
                 states[usage.provider] = ProviderState(usage: usage)
-                pace[usage.provider] = await history.observe(usage)
                 notifications.evaluate(usage: usage, previous: previous, settings: settings)
                 await snapshots.save(usage)
 

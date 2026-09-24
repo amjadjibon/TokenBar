@@ -70,11 +70,15 @@ nonisolated extension CodexProtocol.RateLimitsResult {
                     guard let window else { return nil }
                     let windowName = Self.windowName(minutes: window.windowDurationMins, slot: slot)
                     let bucketName = snapshot.limitName ?? key
+                    let reset = window.resetDate
                     return UsageLimit(
                         id: "\(key).\(slot)",
                         name: prefixed ? "\(bucketName) \(windowName)" : windowName,
                         usedPercent: window.usedPercent,
-                        resetAt: window.resetDate
+                        windowStartAt: reset.flatMap { date in
+                            window.windowDurationMins.map { date.addingTimeInterval(-Double($0) * 60) }
+                        },
+                        resetAt: reset
                     )
                 }
         }

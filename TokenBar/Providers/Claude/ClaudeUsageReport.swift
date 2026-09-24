@@ -24,13 +24,24 @@ nonisolated enum ClaudeUsageReport {
                 return nil
             }
             let window = String(match.window).trimmingCharacters(in: .whitespaces)
+            let reset = match.reset.flatMap { resetDate(String($0), now: now) }
             return UsageLimit(
                 id: identifier(for: window),
                 name: displayName(for: window),
                 usedPercent: Double(match.percent),
-                resetAt: match.reset.flatMap { resetDate(String($0), now: now) }
+                windowStartAt: reset.flatMap { date in
+                    windowDuration(for: window).map { date.addingTimeInterval(-$0) }
+                },
+                resetAt: reset
             )
         }
+    }
+
+    private static func windowDuration(for window: String) -> TimeInterval? {
+        let lowercased = window.lowercased()
+        if lowercased == "session" { return 5 * 3600 }
+        if lowercased.hasPrefix("week") { return 7 * 24 * 3600 }
+        return nil
     }
 
     private static func identifier(for window: String) -> String {

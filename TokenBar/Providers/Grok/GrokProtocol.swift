@@ -136,6 +136,7 @@ nonisolated extension GrokProtocol.BillingResult {
                     id: name.lowercased(),
                     name: name,
                     usedPercent: usedPercent,
+                    windowStartAt: start,
                     resetAt: reset
                 )
             ],

@@ -3,61 +3,40 @@ import Testing
 @testable import TokenBar
 
 struct UsagePaceTests {
-    @Test func showsAbovePaceWhenProjectedUsageExceedsTheQuota() {
-        #expect(UsagePace.evaluate(
-            earlierUsed: 20,
-            currentUsed: 40,
-            elapsed: 3600,
-            timeUntilReset: 4 * 3600
-        ) == .above)
+    private let start = Date(timeIntervalSince1970: 1_000_000)
+
+    private func pace(remaining: Double, elapsedHours: Double) -> UsagePace? {
+        let limit = UsageLimit(
+            id: "five-hour",
+            name: "5 hour",
+            remainingPercent: remaining,
+            windowStartAt: start,
+            resetAt: start.addingTimeInterval(5 * 3600)
+        )
+        return UsagePace.evaluate(limit: limit, now: start.addingTimeInterval(elapsedHours * 3600))
     }
 
-    @Test func showsWithinPaceWhenQuotaShouldLast() {
-        #expect(UsagePace.evaluate(
-            earlierUsed: 20,
-            currentUsed: 25,
-            elapsed: 3600,
-            timeUntilReset: 4 * 3600
-        ) == .within)
+    @Test func eightyPercentRemainingAfterOneHourIsOnPace() {
+        #expect(pace(remaining: 80, elapsedHours: 1) == .onPace)
     }
 
-    @Test func waitsForEnoughObservationTime() {
-        #expect(UsagePace.evaluate(
-            earlierUsed: 20,
-            currentUsed: 40,
-            elapsed: 5 * 60,
-            timeUntilReset: 4 * 3600
-        ) == nil)
+    @Test func lessThanEightyPercentRemainingAfterOneHourIsAbovePace() {
+        #expect(pace(remaining: 60, elapsedHours: 1) == .above)
     }
 
-    @Test func ignoresExpiredWindowsAndProviderCorrections() {
+    @Test func moreThanEightyPercentRemainingAfterOneHourIsBelowPace() {
+        #expect(pace(remaining: 90, elapsedHours: 1) == .below)
+    }
+
+    @Test func ignoresAnUnknownOrExpiredWindow() {
+        let reset = start.addingTimeInterval(5 * 3600)
         #expect(UsagePace.evaluate(
-            earlierUsed: 30,
-            currentUsed: 20,
-            elapsed: 3600,
-            timeUntilReset: 3600
+            limit: UsageLimit(id: "x", name: "X", usedPercent: 20, resetAt: reset),
+            now: start
         ) == nil)
         #expect(UsagePace.evaluate(
-            earlierUsed: 20,
-            currentUsed: 30,
-            elapsed: 3600,
-            timeUntilReset: 0
+            limit: UsageLimit(id: "x", name: "X", usedPercent: 20, windowStartAt: start, resetAt: reset),
+            now: reset.addingTimeInterval(1)
         ) == nil)
-    }
-
-    @Test func exhaustedQuotaIsAbovePace() {
-        #expect(UsagePace.evaluate(
-            earlierUsed: 100,
-            currentUsed: 100,
-            elapsed: 3600,
-            timeUntilReset: 3600
-        ) == .above)
-    }
-
-    @Test func matchesResetTimesWithSmallProviderJitter() {
-        let reset = Date(timeIntervalSince1970: 1_000_000)
-        #expect(HistoryStore.sameWindow(reset, reset.addingTimeInterval(-1)))
-        #expect(!HistoryStore.sameWindow(reset, reset.addingTimeInterval(3600)))
-        #expect(!HistoryStore.sameWindow(reset, nil))
     }
 }

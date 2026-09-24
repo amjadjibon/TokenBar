@@ -21,12 +21,14 @@ struct ClaudeProviderTests {
         #expect(session.name == "Session")
         #expect(session.usedPercent == 36)
         #expect(session.remainingPercent == 64)
+        #expect(session.windowStartAt == session.resetAt?.addingTimeInterval(-5 * 3600))
 
         let weekly = usage.limits[1]
         #expect(weekly.id == "week-all-models")
         #expect(weekly.name == "Weekly")
         #expect(weekly.usedPercent == 5)
         #expect(weekly.remainingPercent == 95)
+        #expect(weekly.windowStartAt == weekly.resetAt?.addingTimeInterval(-7 * 24 * 3600))
     }
 
     @Test func readsResetStampsInTheirStatedTimeZone() throws {

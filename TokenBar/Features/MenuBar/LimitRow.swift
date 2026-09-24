@@ -2,19 +2,13 @@ import SwiftUI
 
 struct LimitRow: View {
     let limit: UsageLimit
-    let pace: UsagePace?
+    let observedAt: Date
 
     private var isLow: Bool {
         (limit.remainingPercent ?? 100) < 20
     }
 
-    private var paceMessage: String? {
-        guard limit.usedPercent != nil,
-              let reset = limit.resetAt,
-              reset > Date()
-        else { return nil }
-        return pace?.message ?? "Collecting usage pace…"
-    }
+    private var pace: UsagePace? { UsagePace.evaluate(limit: limit, now: observedAt) }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -45,8 +39,8 @@ struct LimitRow: View {
             .font(.caption)
             .foregroundStyle(.secondary)
 
-            if let paceMessage {
-                Text(paceMessage)
+            if let pace {
+                Text(pace.message)
                     .font(.caption)
                     .foregroundStyle(pace == .above ? .orange : .secondary)
             }
@@ -62,7 +56,7 @@ struct LimitRow: View {
         ]
         if isLow { parts.append("low") }
         if let reset = QuotaFormat.reset(limit.resetAt) { parts.append(reset) }
-        if let paceMessage { parts.append(paceMessage) }
+        if let pace { parts.append(pace.message) }
         return parts.joined(separator: ", ")
     }
 }

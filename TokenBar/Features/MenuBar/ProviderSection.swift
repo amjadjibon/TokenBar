@@ -4,7 +4,6 @@ struct ProviderSection: View {
     let provider: ProviderID
     let state: ProviderState?
     let plan: String?
-    let pace: [String: UsagePace]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -12,7 +11,7 @@ struct ProviderSection: View {
 
             if let usage = state?.usage, !usage.limits.isEmpty {
                 ForEach(usage.limits) { limit in
-                    LimitRow(limit: limit, pace: pace[limit.id])
+                    LimitRow(limit: limit, observedAt: usage.updatedAt)
                 }
                 if usage.freshness().needsWarning {
                     Label(QuotaFormat.age(usage.updatedAt), systemImage: "clock.badge.exclamationmark")
