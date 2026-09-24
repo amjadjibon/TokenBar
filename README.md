@@ -194,6 +194,7 @@ option, because the app is unsandboxed by necessity.
 ./scripts/release.sh 1.1.0             # build, notarise, staple, DMG
 ./scripts/release.sh 1.1.0 --publish   # …and tag and create the GitHub release
 ./scripts/release.sh 1.1.0 --publish --tap amjadjibon/homebrew-tap
+./scripts/release.sh 1.1.0 --skip-notarize --publish --tap amjadjibon/homebrew-tap # prerelease
 ```
 
 Two one-off prerequisites:

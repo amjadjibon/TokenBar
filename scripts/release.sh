@@ -60,7 +60,6 @@ parse_args() {
     [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || die "version must look like 1.2.3, got '$VERSION'"
     if [ -n "$TAP" ]; then
         $PUBLISH || die "--tap requires --publish"
-        $SKIP_NOTARIZE && die "a Homebrew cask needs a notarised release"
         [[ "$TAP" =~ ^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$ ]] || die "--tap must look like owner/repo"
     fi
 }
@@ -79,7 +78,7 @@ preflight() {
     fi
 
     if $SKIP_NOTARIZE; then
-        printf '  ! --skip-notarize: the result will NOT run on anyone else’s Mac\n'
+        printf '  ! --skip-notarize: Gatekeeper will block this build until quarantine is removed\n'
         return
     fi
 
@@ -204,11 +203,11 @@ publish() {
         local notes="$BUILD/notes.md"
         cat > "$notes" <<'NOTE'
 > **Not notarised.** This build is signed with a development certificate, so
-> macOS Gatekeeper will refuse to open it on any other machine. To run it
-> anyway, right-click the app in Finder and choose **Open**, or:
+> macOS Gatekeeper will block it on another machine. After installing, remove
+> the quarantine attribute to open it:
 >
 > ```sh
-> xattr -d com.apple.quarantine /Applications/TokenBar.app
+> xattr -dr com.apple.quarantine /Applications/TokenBar.app
 > ```
 
 NOTE
@@ -252,9 +251,22 @@ cask "tokenbar" do
     "~/Library/Preferences/$BUNDLE_ID.plist",
   ]
 
-  caveats "Requires macOS 26.5 or later."
-end
 CASK
+
+    if $SKIP_NOTARIZE; then
+        cat >> "$cask" <<'CASK'
+  caveats <<~EOS
+    Requires macOS 26.5 or later.
+    This prerelease is not notarized. After installation, run:
+      xattr -dr com.apple.quarantine /Applications/TokenBar.app
+  EOS
+CASK
+    else
+        cat >> "$cask" <<'CASK'
+  caveats "Requires macOS 26.5 or later."
+CASK
+    fi
+    printf 'end\n' >> "$cask"
 
     ruby -c "$cask"
     git -C "$checkout" add Casks/tokenbar.rb
