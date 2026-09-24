@@ -23,9 +23,9 @@ nonisolated enum UsagePace: Sendable, Equatable {
 
     var message: String {
         switch self {
-        case .above: "Above pace · quota used faster than time elapsed"
-        case .onPace: "On pace · quota use matches elapsed time"
-        case .below: "Below pace · quota used slower than time elapsed"
+        case .above: "Above pace"
+        case .onPace: "On pace"
+        case .below: "Below pace"
         }
     }
 }
