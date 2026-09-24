@@ -10,6 +10,7 @@ final class AppState {
     private(set) var states: [ProviderID: ProviderState] = [:]
     private(set) var isRefreshing = false
     private(set) var lastRefresh: Date?
+    private(set) var pace: [ProviderID: [String: UsagePace]] = [:]
 
     private let manager: ProviderManager
     private let settingsStore: SettingsStore
@@ -84,6 +85,7 @@ final class AppState {
         let enabled = settings.enabledProviders
         for provider in ProviderID.allCases where !enabled.contains(provider) {
             states[provider] = nil
+            pace[provider] = nil
         }
 
         let results = await manager.refresh(enabled)
@@ -93,14 +95,9 @@ final class AppState {
             case .success(let usage):
                 let previous = states[usage.provider]?.usage
                 states[usage.provider] = ProviderState(usage: usage)
+                pace[usage.provider] = await history.observe(usage)
                 notifications.evaluate(usage: usage, previous: previous, settings: settings)
                 await snapshots.save(usage)
-                // Refreshes far outnumber actual quota changes; logging only the
-                // changes keeps the history useful and stops the file growing
-                // by a few hundred identical rows a day.
-                if previous?.limits != usage.limits {
-                    await history.append(usage)
-                }
 
             case .failure(let provider, let error):
                 // Keep the last good numbers on screen alongside the error.

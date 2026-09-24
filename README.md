@@ -126,6 +126,12 @@ percentages, a bar, and the reset countdown. Past a certain height the list
 scrolls while the header and footer stay pinned, so refresh, settings and quit
 stay reachable no matter how many providers are enabled.
 
+After at least 15 minutes of readings in the same quota window, each row also
+shows whether observed usage is within the pace needed to last until reset or may
+use up the quota early. The estimate compares the change in used percentage
+with the remaining percentage and time. It is unavailable when a provider does
+not report a reset time, and it is a projection rather than a token count.
+
 Bars read green with half the quota or more left, yellow below that, and red
 under 10%. Health is never signalled by colour alone: the percentage, a warning
 glyph and the accessibility label all carry it too.

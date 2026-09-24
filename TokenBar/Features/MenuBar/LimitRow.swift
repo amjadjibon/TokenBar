@@ -2,6 +2,7 @@ import SwiftUI
 
 struct LimitRow: View {
     let limit: UsageLimit
+    let pace: UsagePace?
 
     private var isLow: Bool {
         (limit.remainingPercent ?? 100) < 20
@@ -35,6 +36,12 @@ struct LimitRow: View {
             }
             .font(.caption)
             .foregroundStyle(.secondary)
+
+            if let pace {
+                Text(pace.message)
+                    .font(.caption)
+                    .foregroundStyle(pace == .above ? .orange : .secondary)
+            }
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
@@ -47,6 +54,7 @@ struct LimitRow: View {
         ]
         if isLow { parts.append("low") }
         if let reset = QuotaFormat.reset(limit.resetAt) { parts.append(reset) }
+        if let pace { parts.append(pace.message) }
         return parts.joined(separator: ", ")
     }
 }
