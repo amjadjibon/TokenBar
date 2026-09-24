@@ -241,7 +241,7 @@ cask "tokenbar" do
   desc "Menu bar app for AI subscription quota usage"
   homepage "https://github.com/amjadjibon/TokenBar"
 
-  depends_on macos: ">= 26.5"
+  depends_on macos: :tahoe
 
   app "TokenBar.app"
 
@@ -251,6 +251,8 @@ cask "tokenbar" do
     "~/Library/Application Support/TokenBar",
     "~/Library/Preferences/$BUNDLE_ID.plist",
   ]
+
+  caveats "Requires macOS 26.5 or later."
 end
 CASK
 
